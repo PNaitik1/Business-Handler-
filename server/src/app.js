@@ -56,17 +56,23 @@ app.get('/', (req, res) => {
     });
 });
 
-app.use('/api/health', healthRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/suppliers', supplierRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/quotations', quotationRoutes);
-app.use('/api/purchase-orders', poRoutes);
-app.use('/api/deliveries', deliveryRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/reports', reportRoutes);
+// Mount routes to both /api and root to handle standalone and serverless environments
+const mountRoutes = (prefix = '') => {
+    app.use(`${prefix}/health`, healthRoutes);
+    app.use(`${prefix}/auth`, authRoutes);
+    app.use(`${prefix}/dashboard`, dashboardRoutes);
+    app.use(`${prefix}/suppliers`, supplierRoutes);
+    app.use(`${prefix}/products`, productRoutes);
+    app.use(`${prefix}/inventory`, inventoryRoutes);
+    app.use(`${prefix}/quotations`, quotationRoutes);
+    app.use(`${prefix}/purchase-orders`, poRoutes);
+    app.use(`${prefix}/deliveries`, deliveryRoutes);
+    app.use(`${prefix}/payments`, paymentRoutes);
+    app.use(`${prefix}/reports`, reportRoutes);
+};
+
+mountRoutes('/api');
+mountRoutes('');
 
 /**
  * 4. Error Handling

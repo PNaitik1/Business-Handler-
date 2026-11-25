@@ -1,4 +1,13 @@
-const bcrypt = require('bcrypt');
+let bcrypt;
+try {
+  bcrypt = require('bcrypt');
+} catch (e) {
+  try {
+    bcrypt = require('bcryptjs');
+  } catch (err) {
+    console.error('Neither bcrypt nor bcryptjs found');
+  }
+}
 const jwt = require('jsonwebtoken');
 const { pool } = require('../config/db');
 const config = require('../config/env');
