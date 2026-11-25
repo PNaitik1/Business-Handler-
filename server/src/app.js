@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const config = require('./config/env');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
@@ -19,7 +20,14 @@ const reportRoutes = require('./routes/reportRoutes');
 const app = express();
 
 /**
- * 1. CORS Configuration
+ * 1. Static Client Assets
+ * Serves compiled React frontend production assets
+ */
+const clientDistPath = path.resolve(__dirname, '../../client/dist');
+app.use(express.static(clientDistPath));
+
+/**
+ * 2. CORS Configuration
  * Allows frontend origins (Vite default localhost:5173, etc.)
  */
 const allowedOrigins = [
@@ -40,17 +48,17 @@ app.use(cors({
 }));
 
 /**
- * 2. Request Parsers
+ * 3. Request Parsers
  */
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 /**
- * 3. Base & Health Routes
+ * 4. Base API Route
  */
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
     res.json({
-        message: 'Welcome to SupplySync API - Supplier, Procurement and Purchase Management System',
+        message: 'Welcome to SupplySync API – Supplier, Procurement and Purchase Management System',
         status: 'online',
         documentation: '/api/health'
     });
@@ -75,7 +83,21 @@ mountRoutes('/api');
 mountRoutes('');
 
 /**
- * 4. Error Handling
+ * 5. SPA Fallback
+ * Any non-API route serves the React app index.html
+ */
+app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+        return next();
+    }
+    const indexPath = path.join(clientDistPath, 'index.html');
+    res.sendFile(indexPath, (err) => {
+        if (err) return next();
+    });
+});
+
+/**
+ * 6. Error Handling
  */
 app.use(notFoundHandler);
 app.use(errorHandler);
